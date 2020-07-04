@@ -34,6 +34,7 @@ class StoryChat extends Component{
     this.getPlayerIndex = this.getPlayerIndex.bind(this);
     this.onSessionChangedListener = this.onSessionChangedListener.bind(this);
     this.onPlayerJoinedListener = this.onPlayerJoinedListener.bind(this);
+    this.onPlayerLeftListener = this.onPlayerLeftListener.bind(this);
   }
 
   onSessionChangedListener(data){
@@ -44,6 +45,12 @@ class StoryChat extends Component{
     if(data.newPlayer == Cookie.get('userId'))
       return
     toast.dark(data.newPlayer);
+  }
+
+  onPlayerLeftListener = function(data){
+    if(data.newPlayer == Cookie.get('userId'))
+      return
+      toast.dark(data.leftPlayer+" has left the story");
   }
 
   componentDidMount(){
@@ -74,11 +81,13 @@ class StoryChat extends Component{
     session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
     session.on('patched', this.onSessionChangedListener);
     session.on("joined", this.onPlayerJoinedListener)
+    session.on('left', this.onPlayerLeftListener);    
   } 
 
   componentWillUnmount(){
     session.removeListener("joined", this.onPlayerJoinedListener);
     session.removeListener("patched", this.onSessionChangedListener);
+    session.removeListener('left', this.onPlayerLeftListener);
 
     let playerSession = {};
     playerSession[Cookie.get('userId')] = null
