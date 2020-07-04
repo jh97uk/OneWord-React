@@ -54,7 +54,7 @@ class StoryChat extends Component{
       })
 
       Object.keys(self.state.session.playersInSessionIds).forEach(function(key, index){
-        if(key == self.state.messages[self.state.messages.length-1].authorId){
+        if(self.state.messages[self.state.messages.length-1].authorId != null && key == self.state.messages[self.state.messages.length-1].authorId){
           console.log(Object.keys(self.state.session.playersInSessionIds).length)
           if(Object.keys(self.state.session.playersInSessionIds).length > index+1){
             self.setState({currentTurnUserId:index+1});
@@ -152,7 +152,7 @@ class StoryChat extends Component{
     const self = this;
     if(this.state.session != undefined){      
       Object.keys(this.state.session.playersInSessionIds).forEach(function(key, index){
-        if(self.state.session.playersInSessionIds[key].typing){
+        if(self.state.session.playersInSessionIds[key] != null && self.state.session.playersInSessionIds[key].typing){
           return true;
         }
       });
@@ -172,7 +172,9 @@ class StoryChat extends Component{
             })}
 
             {Object.keys(this.state.session.playersInSessionIds).map((key, index)=>{
-                return <Word word="" key={index} typing={this.state.session.playersInSessionIds[key].typing} userColor={playerColors[index]} hidden={!this.state.session.playersInSessionIds[key].typing}/>
+                if(this.state.session.playersInSessionIds[key] != null){
+                  return <Word word="" key={index} typing={this.state.session.playersInSessionIds[key].typing} userColor={playerColors[index]} hidden={!this.state.session.playersInSessionIds[key].typing}/>
+                } 
             })}
           {typingElement}
           
