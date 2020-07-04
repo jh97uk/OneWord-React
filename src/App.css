@@ -185,20 +185,21 @@ a.button.primary{
   width:100%;
 }
 .fullWidth{
+  float:left;
   width:100%;
+  height:100%;
 }
 
 .fullScreen{
   float:left;
-  width:calc(100% - 30px);
-  height:calc(100% - 55px - 30px);
-  padding:15px;
+  width:100%;
+  height:calc(100% - 55px - 45px);
 }
 
 .word{
   float:left;
   padding:10px;
-  background-color: rgb(14, 29, 66);
+  background-color: #0e1d42;
   border-radius: 4px;
   margin-left:5px;
   margin-top:5px;
@@ -206,3 +207,66 @@ a.button.primary{
 .word label{
   color:white;
 }
+
+.typing-dot {
+  height: 12px;
+  width: 12px;
+  border-radius: 100%;
+  margin-left: 4px;
+  display: inline-block;
+  background-color: rgb(30, 39, 94);
+  animation: 1.2s typing-dot ease-in-out infinite;
+  }
+  .typing-dot:nth-of-type(2) {
+  animation-delay: 0.15s;
+  }
+  .typing-dot:nth-of-type(3) {
+  animation-delay: 0.25s;
+  }
+  @keyframes typing-dot {
+  15% {
+  transform: translateY(-35%);
+  opacity: 0.5;
+  }
+  30% {
+  transform: translateY(0%);
+  opacity: 1;
+  }
+  }
+
+  .statusMessage{
+    margin:0px auto;
+    margin-top:40px;
+    font-size: 23px;
+    text-align: center;
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+  .messageBar{
+    float:left;
+    width:100%;
+    height:45px;
+  }
+
+  .messageBar input{
+    width:calc(80% - 2px);
+    height:calc(100% - 2px);
+    border:none;
+    margin:0px;
+    float:left;
+    padding-left:10px;
+    font-size: 22px;
+    background:#f9f9f9;
+  }
+
+  .messageBar button{
+    float:left;
+    width:calc(20% - 9px);
+    height:100%;
+    margin:0px;
+    border:none;
+    background-color:rgb(30, 39, 94);
+    color:white;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16px;
+  }
