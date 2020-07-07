@@ -1,4 +1,5 @@
 /* eslint-disable import/first */
+
 import Cookies from 'universal-cookie';
 import React, {Component} from 'react';
 import { ToastContainer, toast } from 'react-toastify';
@@ -59,9 +60,11 @@ class StoryChat extends Component{
       self.setState({
         messages:self.state.messages.concat(message)
       })
+      console.log("testing");
 
       Object.keys(self.state.session.playersInSessionIds).forEach(function(key, index){
-        if(self.state.messages[self.state.messages.length-1].authorId != null && key == self.state.messages[self.state.messages.length-1].authorId){
+        console.log("test");
+        if((self.state.messages[self.state.messages.length-1].authorId != null && self.state.messages[self.state.messages.length-1].authorId != undefined) && key == self.state.messages[self.state.messages.length-1].authorId){
           if(Object.keys(self.state.session.playersInSessionIds).length > index+1){
             self.setState({currentTurnUserId:index+1});
           } else{
@@ -186,7 +189,7 @@ class StoryChat extends Component{
 
           {typingElement}
         </div>
-        
+
         <div className="messageBar">
           <input placeholder="WORD" disabled={!this.isItMyturn()} type="text" value={this.state.sendWord || ""} onChange={event=>this.onWordFieldChange(event.target.value)} onKeyDown={this.onEnterPressed}></input>
           <button onClick={()=>this.addWord(this.state.sendWord)} disabled={!this.isItMyturn()}>SEND</button>
