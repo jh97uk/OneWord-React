@@ -44,7 +44,7 @@ class StoryChat extends Component{
   onPlayerJoinedListener = function(data){
     if(data.newPlayer == Cookie.get('userId'))
       return
-    toast.dark(data.newPlayer);
+    toast.dark(data.newPlayer+" has joined the story");
   }
 
   onPlayerLeftListener = function(data){
@@ -181,7 +181,7 @@ class StoryChat extends Component{
             })}
 
             {Object.keys(this.state.session.playersInSessionIds).map((key, index)=>{
-                if(this.state.session.playersInSessionIds[key] != null){
+                if(this.state.session.playersInSessionIds[key] != null && Cookie.get('userId') != key){
                   return <Word word="" key={index} typing={this.state.session.playersInSessionIds[key].typing} userColor={playerColors[index]} hidden={!this.state.session.playersInSessionIds[key].typing}/>
                 } 
             })}
@@ -190,7 +190,7 @@ class StoryChat extends Component{
           
         </div>
         <div className="messageBar">
-          <input placeholder="WORD" disabled={!this.isItMyturn()} type="text" value={this.state.sendWord} onChange={event=>this.onWordFieldChange(event.target.value)} onKeyDown={this.onEnterPressed}></input>
+          <input placeholder="WORD" disabled={!this.isItMyturn()} type="text" value={this.state.sendWord || ""} onChange={event=>this.onWordFieldChange(event.target.value)} onKeyDown={this.onEnterPressed}></input>
           <button onClick={()=>this.addWord(this.state.sendWord)} disabled={!this.isItMyturn()}>SEND</button>
         </div>
         
