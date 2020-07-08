@@ -143,6 +143,8 @@ class StoryChat extends Component{
       if(key == Cookie.get('userId'))
         userIndex = index;
     });
+    if(userIndex == this.state.currentTurnUserId)
+      this.wordInput.focus();
     return userIndex == this.state.currentTurnUserId;
   }
 
@@ -191,7 +193,7 @@ class StoryChat extends Component{
         </div>
 
         <div className="messageBar">
-          <input placeholder="WORD" disabled={!this.isItMyturn()} type="text" value={this.state.sendWord || ""} onChange={event=>this.onWordFieldChange(event.target.value)} onKeyDown={this.onEnterPressed}></input>
+          <input ref={(input)=>{this.wordInput = input}} placeholder="WORD" disabled={!this.isItMyturn()} type="text" value={this.state.sendWord || ""} onChange={event=>this.onWordFieldChange(event.target.value)} onKeyDown={this.onEnterPressed}></input>
           <button onClick={()=>this.addWord(this.state.sendWord)} disabled={!this.isItMyturn()}>SEND</button>
         </div>
         
