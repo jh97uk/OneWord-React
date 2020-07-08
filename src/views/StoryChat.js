@@ -169,7 +169,7 @@ class StoryChat extends Component{
     }
 
     return(
-      <div style={{width:'100%', height:'100%', float:'left'}}>
+      <div style={{display:'flex', width:'100%', height:'100%', flexDirection:'column'}}>
         <AppBar pageTitle={this.state.storyTitle} backRoute="/create"></AppBar>
         <ToastContainer 
         position="top-right"

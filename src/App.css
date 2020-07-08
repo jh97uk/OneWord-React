@@ -191,9 +191,8 @@ a.button.primary{
 }
 
 .fullScreen{
-  float:left;
   width:100%;
-  height:calc(100% - 55px - 45px);
+  height: 100%;
 }
 
 .word{
@@ -243,9 +242,9 @@ a.button.primary{
   }
 
   .messageBar{
-    float:left;
     width:100%;
-    height:45px;
+    max-height: 45px;
+    height:100%;
     display:flex;
   }
 
