@@ -59,7 +59,7 @@ class StoryChat extends Component{
     });
   }
 
-  onSessionChangedListener(data){
+  onSessionChangedListener = function(data){
     this.setState({session:data});
   }
 
@@ -95,16 +95,27 @@ class StoryChat extends Component{
       });
     });
 
-    const test = session.get(this.props.location.pathname.split("/")[2], function(){
+    session.get(this.props.location.pathname.split("/")[2], function(){
     }).then(function(data){
-      self.setState({storyTitle:data.name})
+      if(data.code==404){
+        self.props.alert.show("This game doesn't exist", {
+        title:"Game not found", 
+        closeCopy:'Ok',
+        onClose:function(){
+          self.setState({exit:true});
+        }})
+      } else{
+        let playerSession = {};
+        playerSession[Cookie.get('userId')] = {typing:false}
+        session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
+        });
+        session.on('patched', self.onSessionChangedListener);
+        session.on("joined", self.onPlayerJoinedListener);
+        session.on('left', self.onPlayerLeftListener);
+        self.setState({storyTitle:data.name})
+      }
     });
-    let playerSession = {};
-    playerSession[Cookie.get('userId')] = {typing:false}
-    session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
-    session.on('patched', this.onSessionChangedListener);
-    session.on("joined", this.onPlayerJoinedListener)
-    session.on('left', this.onPlayerLeftListener);    
+    
   } 
 
   componentWillUnmount(){
