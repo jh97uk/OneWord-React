@@ -1,14 +1,15 @@
 /* eslint-disable import/first */
 
 import Cookies from 'universal-cookie';
-import React, {Component} from 'react';
+import React, {Component, Fragment, useState} from 'react';
 import { ToastContainer, toast } from 'react-toastify';
+import { withAlert } from "react-alert";
 import 'react-toastify/dist/ReactToastify.css';
 import '../App.css';
 import Ripples from 'react-ripples';
 import AppBar from '../widgets/AppBar';
 import Word from '../widgets/Word';
-import {Link, BrowserRouter as Router} from 'react-router-dom';
+import {Redirect} from 'react-router-dom';
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import {nanoid} from 'nanoid';
@@ -18,16 +19,15 @@ import feathers from '@feathersjs/client';
 const socket = io('http://192.168.0.15:3030');
 const Cookie = new Cookies();
 
-
 const feathersClient = feathers();
 feathersClient.configure(feathers.socketio(socket));
 const messages = feathersClient.service('messages')
 const session = feathersClient.service("sessions");
-
 class StoryChat extends Component{
+  
   constructor(){
     super()
-    this.state={messages:[], storyTitle:'', typingUser:{id:0, typing:false}, session:{playersInSessionIds:{}}, currentTurnUserId:0};
+    this.state={exit:false, messages:[], storyTitle:'', typingUser:{id:0, typing:false}, session:{playersInSessionIds:{}}, currentTurnUserId:0};
     this.addWord = this.addWord.bind(this);
     this.onWordFieldChange = this.onWordFieldChange.bind(this);
     this.onEnterPressed = this.onEnterPressed.bind(this);
@@ -36,6 +36,27 @@ class StoryChat extends Component{
     this.onSessionChangedListener = this.onSessionChangedListener.bind(this);
     this.onPlayerJoinedListener = this.onPlayerJoinedListener.bind(this);
     this.onPlayerLeftListener = this.onPlayerLeftListener.bind(this);
+    this.onLeaveGameButtonPressed = this.onLeaveGameButtonPressed.bind(this);
+  }
+
+  onLeaveGameButtonPressed(){
+    const self = this;
+    this.props.alert.close = function(){
+      alert();
+    }
+    this.props.alert.show("Leaving the story will stop it.", 
+    {
+      title:"Are you sure you want to close the story?", 
+      actions:[
+        {
+          copy:"Leave",
+          onClick:function(){
+            self.setState({exit:true})
+          }
+        }
+        
+      ],
+    });
   }
 
   onSessionChangedListener(data){
@@ -162,6 +183,8 @@ class StoryChat extends Component{
     const playerColors = {0:'#0e1d42', 1:"#76AA72", 2:"#165C6C"}
     let typingElement;
     const self = this;
+
+
     if(this.state.session != undefined){      
       Object.keys(this.state.session.playersInSessionIds).forEach(function(key, index){
         if(self.state.session.playersInSessionIds[key] != null && self.state.session.playersInSessionIds[key].typing){
@@ -169,10 +192,12 @@ class StoryChat extends Component{
         }
       });
     }
-
+    if (this.state.exit) {
+      return <Redirect to={"/create"}/>
+    }
     return(
       <div style={{display:'flex', width:'100%', height:'100%', flexDirection:'column'}}>
-        <AppBar pageTitle={this.state.storyTitle} backRoute="/create"></AppBar>
+        <AppBar pageTitle={this.state.storyTitle} backRoute="/create" onBackButtonFunction={this.onLeaveGameButtonPressed}></AppBar>
         <ToastContainer 
         position="top-right"
         autoClose={1000}
@@ -202,4 +227,4 @@ class StoryChat extends Component{
   }
 }
 
-export default StoryChat;
+export default withAlert()(StoryChat);
