@@ -97,23 +97,21 @@ class StoryChat extends Component{
 
     session.get(this.props.location.pathname.split("/")[2], function(){
     }).then(function(data){
-      if(data.code==404){
-        self.props.alert.show("This game doesn't exist", {
-        title:"Game not found", 
+      let playerSession = {};
+      playerSession[Cookie.get('userId')] = {typing:false}
+      session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
+      });
+      session.on('patched', self.onSessionChangedListener);
+      session.on("joined", self.onPlayerJoinedListener);
+      session.on('left', self.onPlayerLeftListener);
+      self.setState({storyTitle:data.name})
+    }, function(error){
+      self.props.alert.show("Uhoh, something went wrong...", {
+        title:error.message, 
         closeCopy:'Ok',
         onClose:function(){
           self.setState({exit:true});
         }})
-      } else{
-        let playerSession = {};
-        playerSession[Cookie.get('userId')] = {typing:false}
-        session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
-        });
-        session.on('patched', self.onSessionChangedListener);
-        session.on("joined", self.onPlayerJoinedListener);
-        session.on('left', self.onPlayerLeftListener);
-        self.setState({storyTitle:data.name})
-      }
     });
     
   } 
@@ -156,7 +154,15 @@ class StoryChat extends Component{
       text:word,
       storyId:this.props.location.pathname.split("/")[2],
       userId:Cookie.get("userId")
-    });
+    }).then(function(data){
+    }, function(error){
+      self.props.alert.show("Uhoh, something went wrong...", {
+        title:error.message, 
+        closeCopy:'Ok',
+        onClose:function(){
+          self.setState({exit:true});
+        }})
+    })
     this.setState({sendWord:''});
   }
 
