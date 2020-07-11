@@ -150,6 +150,7 @@ class StoryChat extends Component{
   }
 
   addWord(word) {
+    var self = this;
     messages.create({
       text:word,
       storyId:this.props.location.pathname.split("/")[2],
@@ -158,10 +159,7 @@ class StoryChat extends Component{
     }, function(error){
       self.props.alert.show("Uhoh, something went wrong...", {
         title:error.message, 
-        closeCopy:'Ok',
-        onClose:function(){
-          self.setState({exit:true});
-        }})
+        closeCopy:'Ok'})
     })
     this.setState({sendWord:''});
   }
