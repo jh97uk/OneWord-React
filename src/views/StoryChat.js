@@ -16,17 +16,19 @@ import {nanoid} from 'nanoid';
 
 import io from 'socket.io-client';
 import feathers from '@feathersjs/client';
-const socket = io('http://192.168.0.15:3030');
 const Cookie = new Cookies();
 
-const feathersClient = feathers();
-feathersClient.configure(feathers.socketio(socket));
-const messages = feathersClient.service('messages')
-const session = feathersClient.service("sessions");
 class StoryChat extends Component{
   
-  constructor(){
+  constructor(props){
     super()
+    
+    const socket = props.connection;
+    const feathersClient = feathers();
+    feathersClient.configure(feathers.socketio(socket));
+    this.messages = feathersClient.service('messages')
+    this.session = feathersClient.service("sessions");
+
     this.state={exit:false, messages:[], storyTitle:'', typingUser:{id:0, typing:false}, session:{playersInSessionIds:{}}, currentTurnUserId:0};
     this.addWord = this.addWord.bind(this);
     this.onWordFieldChange = this.onWordFieldChange.bind(this);
@@ -64,6 +66,7 @@ class StoryChat extends Component{
   }
 
   onPlayerJoinedListener = function(data){
+    console.log(data);
     if(data.newPlayer == Cookie.get('userId'))
       return
     toast.dark(data.newPlayer+" has joined the story");
@@ -77,7 +80,7 @@ class StoryChat extends Component{
 
   componentDidMount(){
     var self = this;
-    messages.on('created', function(message){
+    this.messages.on('created', function(message){
       self.setState({
         messages:self.state.messages.concat(message)
       })
@@ -95,15 +98,15 @@ class StoryChat extends Component{
       });
     });
 
-    session.get(this.props.location.pathname.split("/")[2], function(){
+    this.session.get(this.props.location.pathname.split("/")[2], function(){
     }).then(function(data){
       let playerSession = {};
       playerSession[Cookie.get('userId')] = {typing:false}
-      session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
+      self.session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
       });
-      session.on('patched', self.onSessionChangedListener);
-      session.on("joined", self.onPlayerJoinedListener);
-      session.on('left', self.onPlayerLeftListener);
+      self.session.on('patched', self.onSessionChangedListener);
+      self.session.on("joined", self.onPlayerJoinedListener);
+      self.session.on('left', self.onPlayerLeftListener);
       self.setState({storyTitle:data.name})
     }, function(error){
       self.props.alert.show("Uhoh, something went wrong...", {
@@ -117,13 +120,13 @@ class StoryChat extends Component{
   } 
 
   componentWillUnmount(){
-    session.removeListener("joined", this.onPlayerJoinedListener);
-    session.removeListener("patched", this.onSessionChangedListener);
-    session.removeListener('left', this.onPlayerLeftListener);
+    this.session.removeListener("joined", this.onPlayerJoinedListener);
+    this.session.removeListener("patched", this.onSessionChangedListener);
+    this.session.removeListener('left', this.onPlayerLeftListener);
 
     let playerSession = {};
     playerSession[Cookie.get('userId')] = null
-    session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
+    this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
   }
 
   onWordFieldChange(text){
@@ -132,17 +135,17 @@ class StoryChat extends Component{
     let playerSession = {}
     if(this.state.lastKeyStroke == null || dateDiff >= 1000){
       playerSession[Cookie.get('userId')] = {typing:true}
-      session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
+      this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
       this.typingInterval = setInterval(()=>{
         playerSession[Cookie.get('userId')] = {typing:false}
-        session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
+        this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
         clearInterval(this.typingInterval);
       }, 1000)
     } else{
       clearInterval(this.typingInterval);
       playerSession[Cookie.get('userId')] = {typing:false}
       this.typingInterval = setInterval(()=>{
-        session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
+        this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
         clearInterval(this.typingInterval);
       }, 1000)
     }
@@ -151,7 +154,7 @@ class StoryChat extends Component{
 
   addWord(word) {
     var self = this;
-    messages.create({
+    this.messages.create({
       text:word,
       storyId:this.props.location.pathname.split("/")[2],
       userId:Cookie.get("userId")

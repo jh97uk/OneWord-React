@@ -20,14 +20,20 @@ import { nanoid } from 'nanoid';
 import { positions, Provider } from "react-alert";
 import AlertMUITemplate from "react-alert-template-mui";
 
-const Cookie = new Cookies();
+import io from 'socket.io-client';
+import feathers from '@feathersjs/client';
 
+const socket = io('http://192.168.0.15:3030');
+const Cookie = new Cookies();
+const feathersClient = feathers();
+feathersClient.configure(feathers.socketio(socket));
+const users = feathersClient.service('users');
 
 function App() {
-
-  if(Cookie.get('userId') == undefined){
-    Cookie.set('userId', nanoid(5), {path:'/'});
-  }
+  users.create({name:"test"})
+  users.on('created', function(user){
+    Cookie.set('userId', user.id, {path:'/'});
+  })
 
   return (
     <Provider template={AlertMUITemplate}>
@@ -35,9 +41,9 @@ function App() {
         <Router>
           <Switch>
           <Route path="/join/random" render={(props)=><JoiningStory {...props}/>}/>
-          <Route path="/story/:storyId" render={(props)=><StoryChat {...props}/>}/>
+          <Route path="/story/:storyId" render={(props)=><StoryChat {...props} connection={socket}/>}/>
             <Route path="/create">
-              <CreateGameView></CreateGameView>
+              <CreateGameView connection={socket}></CreateGameView>
             </Route>
             <Route path="/">
               <HomeView></HomeView>

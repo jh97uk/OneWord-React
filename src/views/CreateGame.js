@@ -11,20 +11,21 @@ import Switch from 'react-switch';
 import io from 'socket.io-client';
 import feathers from '@feathersjs/client';
 
-const socket = io('http://192.168.0.15:3030');
-import { nanoid } from 'nanoid';
 
-
-const feathersClient = feathers();
-feathersClient.configure(feathers.socketio(socket));
-const sessions = feathersClient.service('sessions')
-const Cookie = new Cookies();
 
 
 class CreateGameView extends Component {
   
-  constructor() {
+  constructor(props) {
     super();
+
+    const socket = props.connection;
+    const feathersClient = feathers();
+    feathersClient.configure(feathers.socketio(socket));
+    
+    this.sessions = feathersClient.service('sessions')
+    const Cookie = new Cookies();
+
     this.state = { linkOnly: false, storyTitle: '', sessionOwnerId:Cookie.get('userId')};
     this.handleChange = this.handleChange.bind(this);
     this.createGame = this.createGame.bind(this);
@@ -37,7 +38,7 @@ class CreateGameView extends Component {
 
   componentDidMount() {
     var self = this;    
-    sessions.on('created', function (session) {
+    this.sessions.on('created', function (session) {
       console.log(session);
       self.setState({ createdSession: session });
     });
@@ -45,7 +46,7 @@ class CreateGameView extends Component {
 
   createGame() {
     console.log(this.state);
-    sessions.create(this.state, function () {
+    this.sessions.create(this.state, function () {
       alert()
     });
   }
