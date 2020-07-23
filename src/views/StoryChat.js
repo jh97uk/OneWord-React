@@ -16,7 +16,6 @@ import {nanoid} from 'nanoid';
 
 import io from 'socket.io-client';
 import feathers from '@feathersjs/client';
-const Cookie = new Cookies();
 
 class StoryChat extends Component{
   
@@ -26,6 +25,9 @@ class StoryChat extends Component{
     const socket = props.connection;
     const feathersClient = feathers();
     feathersClient.configure(feathers.socketio(socket));
+    if(!props.userId){
+      return;
+    }
     this.messages = feathersClient.service('messages')
     this.session = feathersClient.service("sessions");
 
@@ -33,7 +35,7 @@ class StoryChat extends Component{
     this.addWord = this.addWord.bind(this);
     this.onWordFieldChange = this.onWordFieldChange.bind(this);
     this.onEnterPressed = this.onEnterPressed.bind(this);
-    this.isItMyturn = this.isItMyturn.bind(this);
+    this.isItMyTurn = this.isItMyTurn.bind(this);
     this.getPlayerIndex = this.getPlayerIndex.bind(this);
     this.onSessionChangedListener = this.onSessionChangedListener.bind(this);
     this.onPlayerJoinedListener = this.onPlayerJoinedListener.bind(this);
@@ -66,28 +68,29 @@ class StoryChat extends Component{
   }
 
   onPlayerJoinedListener = function(data){
-    console.log(data);
-    if(data.newPlayer == Cookie.get('userId'))
+    if(data.userId == this.props.userId)
       return
     toast.dark(data.newPlayer+" has joined the story");
   }
 
   onPlayerLeftListener = function(data){
-    if(data.newPlayer == Cookie.get('userId'))
+    if(data.newPlayer == this.props.userId)
       return
       toast.dark(data.leftPlayer+" has left the story");
   }
 
   componentDidMount(){
+    if(!this.props.userId){
+      return false;
+    }
     var self = this;
     this.messages.on('created', function(message){
       self.setState({
         messages:self.state.messages.concat(message)
       })
-      console.log("testing");
+
 
       Object.keys(self.state.session.playersInSessionIds).forEach(function(key, index){
-        console.log("test");
         if((self.state.messages[self.state.messages.length-1].authorId != null && self.state.messages[self.state.messages.length-1].authorId != undefined) && key == self.state.messages[self.state.messages.length-1].authorId){
           if(Object.keys(self.state.session.playersInSessionIds).length > index+1){
             self.setState({currentTurnUserId:index+1});
@@ -101,9 +104,10 @@ class StoryChat extends Component{
     this.session.get(this.props.location.pathname.split("/")[2], function(){
     }).then(function(data){
       let playerSession = {};
-      playerSession[Cookie.get('userId')] = {typing:false}
+      playerSession[self.props.userId] = {typing:false}
       self.session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
       });
+
       self.session.on('patched', self.onSessionChangedListener);
       self.session.on("joined", self.onPlayerJoinedListener);
       self.session.on('left', self.onPlayerLeftListener);
@@ -120,12 +124,15 @@ class StoryChat extends Component{
   } 
 
   componentWillUnmount(){
+    if(!this.props.userId){
+      return false;
+    }
     this.session.removeListener("joined", this.onPlayerJoinedListener);
     this.session.removeListener("patched", this.onSessionChangedListener);
     this.session.removeListener('left', this.onPlayerLeftListener);
 
     let playerSession = {};
-    playerSession[Cookie.get('userId')] = null
+    playerSession[this.props.userId] = null
     this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
   }
 
@@ -134,16 +141,16 @@ class StoryChat extends Component{
     const dateDiff = dateNow-this.state.lastKeyStroke;
     let playerSession = {}
     if(this.state.lastKeyStroke == null || dateDiff >= 1000){
-      playerSession[Cookie.get('userId')] = {typing:true}
+      playerSession[this.props.userId] = {typing:true}
       this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
       this.typingInterval = setInterval(()=>{
-        playerSession[Cookie.get('userId')] = {typing:false}
+        playerSession[this.props.userId] = {typing:false}
         this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
         clearInterval(this.typingInterval);
       }, 1000)
     } else{
       clearInterval(this.typingInterval);
-      playerSession[Cookie.get('userId')] = {typing:false}
+      playerSession[this.props.userId] = {typing:false}
       this.typingInterval = setInterval(()=>{
         this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
         clearInterval(this.typingInterval);
@@ -157,7 +164,7 @@ class StoryChat extends Component{
     this.messages.create({
       text:word,
       storyId:this.props.location.pathname.split("/")[2],
-      userId:Cookie.get("userId")
+      userId:this.props.userId
     }).then(function(data){
     }, function(error){
       self.props.alert.show("Uhoh, something went wrong...", {
@@ -169,17 +176,18 @@ class StoryChat extends Component{
 
   onEnterPressed(event){
     if(event.key == "Enter"){
-      if(this.isItMyturn())
+      if(this.isItMyTurn())
         this.addWord(this.state.sendWord)
     } else if(event.keyCode == 32){
       event.preventDefault();
     }
   }
 
-  isItMyturn(){
+  isItMyTurn(){
     let userIndex;
+    const self = this;
     Object.keys(this.state.session.playersInSessionIds).forEach(function(key, index){
-      if(key == Cookie.get('userId'))
+      if(key == self.props.userId)
         userIndex = index;
     });
     if(userIndex == this.state.currentTurnUserId)
@@ -202,7 +210,9 @@ class StoryChat extends Component{
     let typingElement;
     const self = this;
 
-
+    if(!this.props.userId){
+      return false;
+    }
     if(this.state.session != undefined){      
       Object.keys(this.state.session.playersInSessionIds).forEach(function(key, index){
         if(self.state.session.playersInSessionIds[key] != null && self.state.session.playersInSessionIds[key].typing){
@@ -227,7 +237,7 @@ class StoryChat extends Component{
             })}
 
             {Object.keys(this.state.session.playersInSessionIds).map((key, index)=>{
-                if(this.state.session.playersInSessionIds[key] != null && Cookie.get('userId') != key){
+                if(this.state.session.playersInSessionIds[key] != null && this.props.userId != key){
                   return <Word word="" key={index} typing={this.state.session.playersInSessionIds[key].typing} userColor={playerColors[index]} hidden={!this.state.session.playersInSessionIds[key].typing}/>
                 } 
             })}
@@ -236,8 +246,8 @@ class StoryChat extends Component{
         </div>
 
         <div className="messageBar">
-          <input ref={(input)=>{this.wordInput = input}} placeholder="WORD" disabled={!this.isItMyturn()} type="text" value={this.state.sendWord || ""} onChange={event=>this.onWordFieldChange(event.target.value)} onKeyDown={this.onEnterPressed}></input>
-          <button onClick={()=>this.addWord(this.state.sendWord)} disabled={!this.isItMyturn()}>SEND</button>
+          <input ref={(input)=>{this.wordInput = input}} placeholder="WORD" disabled={!this.isItMyTurn()} type="text" value={this.state.sendWord || ""} onChange={event=>this.onWordFieldChange(event.target.value)} onKeyDown={this.onEnterPressed}></input>
+          <button onClick={()=>this.addWord(this.state.sendWord)} disabled={!this.isItMyTurn()}>SEND</button>
         </div>
         
       </div>

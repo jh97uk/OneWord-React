@@ -1,18 +1,13 @@
 /* eslint-disable import/first */
 
-import Cookies from 'universal-cookie';
-
 import React, { Component } from 'react';
 import '../App.css';
 import Ripples from 'react-ripples';
 import AppBar from '../widgets/AppBar';
 import { Link, BrowserRouter as Router, Redirect } from 'react-router-dom';
 import Switch from 'react-switch';
-import io from 'socket.io-client';
+
 import feathers from '@feathersjs/client';
-
-
-
 
 class CreateGameView extends Component {
   
@@ -24,9 +19,8 @@ class CreateGameView extends Component {
     feathersClient.configure(feathers.socketio(socket));
     
     this.sessions = feathersClient.service('sessions')
-    const Cookie = new Cookies();
 
-    this.state = { linkOnly: false, storyTitle: '', sessionOwnerId:Cookie.get('userId')};
+    this.state = { linkOnly: false, storyTitle: '', sessionOwnerId:props.userId};
     this.handleChange = this.handleChange.bind(this);
     this.createGame = this.createGame.bind(this);
     console.log(this.state);

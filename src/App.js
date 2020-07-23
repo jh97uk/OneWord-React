@@ -1,13 +1,14 @@
 /* eslint-disable import/first */
 
 import Cookies from 'universal-cookie';
-import React from 'react';
+import React, {Component} from 'react';
 import './App.css';
 import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
+  Link,
+  Redirect
 } from 'react-router-dom';
 
 import Logo from './widgets/logo';
@@ -16,6 +17,7 @@ import CreateGameView from './views/CreateGame';
 import HomeView from './views/Home';
 import StoryChat from './views/StoryChat';
 import JoiningStory from './views/JoiningStory';
+import InitializeUserView from './views/IntializeUser';
 import { nanoid } from 'nanoid';
 import { positions, Provider } from "react-alert";
 import AlertMUITemplate from "react-alert-template-mui";
@@ -29,31 +31,46 @@ const feathersClient = feathers();
 feathersClient.configure(feathers.socketio(socket));
 const users = feathersClient.service('users');
 
-function App() {
-  users.create({name:"test"})
-  users.on('created', function(user){
-    Cookie.set('userId', user.id, {path:'/'});
-  })
+class App extends Component{
+  constructor(props){
+    super();
+    this.state = {userId:null, requestedPath:window.location.pathname}
+    this.setUser = this.setUser.bind(this)
+  }
+  setUser(user){
+    this.setState({userId:user.id});
+  }
 
-  return (
-    <Provider template={AlertMUITemplate}>
-      <div className="appContainer">
-        <Router>
-          <Switch>
-          <Route path="/join/random" render={(props)=><JoiningStory {...props}/>}/>
-          <Route path="/story/:storyId" render={(props)=><StoryChat {...props} connection={socket}/>}/>
-            <Route path="/create">
-              <CreateGameView connection={socket}></CreateGameView>
-            </Route>
-            <Route path="/">
-              <HomeView></HomeView>
-            </Route>
-          </Switch>
-        </Router>
-      </div>
-    </Provider>
+  render(){  
+    let redirect = <></>
+    if(this.state.userId){
+      redirect = <Redirect to={this.state.requestedPath}/>
+    } else{
+      redirect = <Redirect to={'/user/new'}/>
+    }
     
-  );
+    return (
+      <Provider template={AlertMUITemplate}>
+        <div className="appContainer">
+          <Router>
+            {redirect}
+            <Switch>
+            <Route path="/user/new" render={(props)=><InitializeUserView {...props} connection={socket} setUser={this.setUser}/>}/>
+            <Route path="/join/random" render={(props)=><JoiningStory {...props} userId={this.state.userId}/>}/>
+            <Route path="/story/:storyId" render={(props)=><StoryChat {...props} connection={socket} userId={this.state.userId}/>}/>
+              <Route path="/create">
+                <CreateGameView connection={socket} userId={this.state.userId}></CreateGameView>
+              </Route>
+              <Route path="/">
+                <HomeView></HomeView>
+              </Route>
+            </Switch>
+          </Router>
+        </div>
+      </Provider>
+      
+    );
+  }
 }
 
 export default App;
