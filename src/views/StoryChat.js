@@ -89,7 +89,6 @@ class StoryChat extends Component{
         messages:self.state.messages.concat(message)
       })
 
-
       Object.keys(self.state.session.playersInSessionIds).forEach(function(key, index){
         if((self.state.messages[self.state.messages.length-1].authorId != null && self.state.messages[self.state.messages.length-1].authorId != undefined) && key == self.state.messages[self.state.messages.length-1].authorId){
           if(Object.keys(self.state.session.playersInSessionIds).length > index+1){
@@ -100,12 +99,18 @@ class StoryChat extends Component{
         }
       });
     });
-
     this.session.get(this.props.location.pathname.split("/")[2], function(){
     }).then(function(data){
       let playerSession = {};
       playerSession[self.props.userId] = {typing:false}
       self.session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
+      }, function(error){
+        self.props.alert.show(error.message, {
+          title:"Uhoh, something went wrong...", 
+          closeCopy:'Ok',
+          onClose:function(){
+            self.setState({exit:true});
+          }})
       });
 
       self.session.on('patched', self.onSessionChangedListener);

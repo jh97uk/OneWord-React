@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@feathersjs/authentication": "^4.5.6",
     "@feathersjs/client": "^4.5.4",
     "@fortawesome/fontawesome-svg-core": "^1.2.28",
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
@@ -11,6 +12,7 @@
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
     "font-awesome": "^4.7.0",
+    "jsrsasign": "^8.0.20",
     "nanoid": "^3.1.9",
     "react": "^16.13.1",
     "react-alert": "^7.0.1",
@@ -21,6 +23,7 @@
     "react-ripples": "^2.2.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
+    "react-spinners-css": "^1.2.2",
     "react-switch": "^5.0.1",
     "react-toastify": "^6.0.6",
     "socketio": "^1.0.0",

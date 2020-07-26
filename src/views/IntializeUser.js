@@ -5,10 +5,12 @@ import Logo from '../widgets/logo';
 import Ripples from 'react-ripples';
 import Cookies from 'universal-cookie';
 import feathers from '@feathersjs/client';
+import { Facebook } from 'react-spinners-css';
 
 class InitializeUserView extends Component{
     constructor(props){
         super();
+        this.state = {loading:false}
         this.createUser = this.createUser.bind(this);
         const socket = props.connection;
         const feathersClient = feathers();
@@ -19,14 +21,34 @@ class InitializeUserView extends Component{
     }
 
     createUser(){
+        this.setState({loading:true})
         const self = this;
         this.users.create({name:this.state.username})
         this.users.on('created', function(user){
+            self.setState({loading:false})
             self.props.setUser(user);
         })
+
+        
     }
 
     render(){
+        let loadingButton;
+        if(this.state.loading){
+            loadingButton = (<Facebook color={'black'}></Facebook>);
+        } else{
+            loadingButton = (
+                <Ripples color="#9e9e9e" className="fullWidth"><button onClick={this.createUser} className="button primary"
+                                style={{
+                                    width:'100%',
+                                    height:'40px',
+                                    border:'0px',
+                                    borderRadius:'6px',
+                                    fontSize:'18px',
+                                    fontWeight:'500'
+                                }}>START</button></Ripples>
+            )
+        }
         return (
             <div>
               <Logo></Logo>
@@ -39,16 +61,12 @@ class InitializeUserView extends Component{
                             padding:'10px'
                         }}></input>
                     </li>
-                    <li>
-                        <Ripples color="#9e9e9e" className="fullWidth"><button onClick={this.createUser} className="button primary"
-                            style={{
-                                width:'100%',
-                                height:'40px',
-                                border:'0px',
-                                borderRadius:'6px',
-                                fontSize:'18px',
-                                fontWeight:'500'
-                            }}>START</button></Ripples>
+                    <li style={{
+                        display:'inline-block',
+                        width:'100%',
+                        textAlign:'center'
+                    }}>
+                        {loadingButton}
                     </li>
                 </ul>
             </div>
