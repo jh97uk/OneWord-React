@@ -4,13 +4,14 @@ import {Link, BrowserRouter as Router, Redirect} from 'react-router-dom';
 import ReactLoading from 'react-loading';
 import Ripples from 'react-ripples';
 import Logo from '../widgets/logo';
+import { withAlert } from "react-alert";
 
 
 class JoiningStory extends React.Component{
   constructor(props){
     super();
     this.state = {
-      noGamesAvailable:false,
+      exit:false,
       gameIdFound:null,
     }
   }
@@ -21,7 +22,12 @@ class JoiningStory extends React.Component{
     const self = this;
     fetch('http://localhost:3030/sessions', {mode:'cors'}).then(response=>response.json()).then(data=>{
       if(data.code != undefined && data.code == 404){
-        self.setState({noGamesAvailable:true});
+        self.props.alert.show(data.message, {
+          title:"Uhoh, something went wrong...", 
+          closeCopy:'Ok',
+          onClose:function(){
+            self.setState({exit:true});
+          }})
       } else{
         self.setState({gameIdFound:data.id});
       }
@@ -30,6 +36,8 @@ class JoiningStory extends React.Component{
   render(props){
     if(this.state.gameIdFound != null){
       return <Redirect to={"/story/" + this.state.gameIdFound} />
+    } else if(this.state.exit){
+      return <Redirect to={"/"} />
     }
     return(
       <div>
@@ -49,4 +57,4 @@ class JoiningStory extends React.Component{
   }
 }
 
-export default JoiningStory;
+export default withAlert()(JoiningStory);
