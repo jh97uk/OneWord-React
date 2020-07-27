@@ -104,6 +104,7 @@ class StoryChat extends Component{
       let playerSession = {};
       playerSession[self.props.userId] = {typing:false}
       self.session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
+        self.setState({session:data});
       }, function(error){
         self.props.alert.show(error.message, {
           title:"Uhoh, something went wrong...", 
@@ -135,7 +136,9 @@ class StoryChat extends Component{
     this.session.removeListener("joined", this.onPlayerJoinedListener);
     this.session.removeListener("patched", this.onSessionChangedListener);
     this.session.removeListener('left', this.onPlayerLeftListener);
-
+    if(this.state.session.playersInSessionIds[this.props.userId] === undefined){
+      return false;
+    }
     let playerSession = {};
     playerSession[this.props.userId] = null
     this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
