@@ -6,10 +6,9 @@ import Ripples from 'react-ripples';
 import AppBar from '../widgets/AppBar';
 import { Link, BrowserRouter as Router, Redirect } from 'react-router-dom';
 import Switch from 'react-switch';
-
 import feathers from '@feathersjs/client';
 import { Facebook } from 'react-spinners-css';
-
+import { withAlert } from "react-alert";
 
 class CreateGameView extends Component {
   
@@ -25,7 +24,6 @@ class CreateGameView extends Component {
     this.state = {createStoryLoading:false, linkOnly: false, storyTitle: '', sessionOwnerId:props.userId};
     this.handleChange = this.handleChange.bind(this);
     this.createGame = this.createGame.bind(this);
-    console.log(this.state);
   }
 
   handleChange(linkOnly) {
@@ -41,7 +39,15 @@ class CreateGameView extends Component {
 
   createGame() {
     this.setState({createStoryLoading:true})
-    this.sessions.create({linkOnly:this.state.linkOnly, storyTitle:this.state.storyTitle, sessionOwnerId:this.state.sessionOwnerId});
+    const self = this;
+    this.sessions.create({linkOnly:this.state.linkOnly, storyTitle:this.state.storyTitle, sessionOwnerId:this.state.sessionOwnerId}).then(function(data){}, function(error){
+      self.props.alert.show(error.message, {
+        title:"Uhoh, something went wrong...", 
+        closeCopy:'Ok',
+        onClose:function(){
+          self.setState({createStoryLoading:false});
+        }})
+    });
   }
 
   render() {
@@ -87,4 +93,4 @@ class CreateGameView extends Component {
   }
 }
 
-export default CreateGameView;
+export default withAlert()(CreateGameView);
