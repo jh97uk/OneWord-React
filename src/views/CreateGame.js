@@ -32,15 +32,14 @@ class CreateGameView extends Component {
 
   componentDidMount() {
     var self = this;    
-    this.sessions.on('created', function (session) {
-      self.setState({createStoryLoading:true, createdSession: session})
-    });
   }
 
   createGame() {
     this.setState({createStoryLoading:true})
     const self = this;
-    this.sessions.create({linkOnly:this.state.linkOnly, storyTitle:this.state.storyTitle, sessionOwnerId:this.state.sessionOwnerId}).then(function(data){}, function(error){
+    this.sessions.create({linkOnly:this.state.linkOnly, storyTitle:this.state.storyTitle, sessionOwnerId:this.state.sessionOwnerId}).then(function(session){
+      self.setState({createStoryLoading:true, createdSession: session})
+    }, function(error){
       self.props.alert.show(error.message, {
         title:"Uhoh, something went wrong...", 
         closeCopy:'Ok',
