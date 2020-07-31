@@ -13,7 +13,6 @@ import {Redirect} from 'react-router-dom';
 import PropTypes from "prop-types";
 import { withRouter } from "react-router";
 import {nanoid} from 'nanoid';
-
 import io from 'socket.io-client';
 import feathers from '@feathersjs/client';
 
@@ -41,6 +40,10 @@ class StoryChat extends Component{
     this.onPlayerJoinedListener = this.onPlayerJoinedListener.bind(this);
     this.onPlayerLeftListener = this.onPlayerLeftListener.bind(this);
     this.onLeaveGameButtonPressed = this.onLeaveGameButtonPressed.bind(this);
+    this.updatePlayerTurn = this.updatePlayerTurn.bind(this);
+    this.onWordCreated = this.onWordCreated.bind(this);
+
+    this.messages.on('created', this.onWordCreated);
   }
 
   onLeaveGameButtonPressed(){
@@ -64,6 +67,8 @@ class StoryChat extends Component{
   }
 
   onSessionChangedListener = function(data){
+    console.log("patched")
+    console.log(data);
     this.setState({session:data});
   }
 
@@ -74,9 +79,39 @@ class StoryChat extends Component{
   }
 
   onPlayerLeftListener = function(data){
-    if(data.newPlayer == this.props.userId)
+    if(data.leftPlayerId == this.props.userId)
       return
-      toast.dark(data.leftPlayer+" has left the story");
+    console.log(data);
+    const updatedSession = this.state.session;
+    delete updatedSession.playersInSessionIds[data.leftPlayerId];
+    this.setState({session:updatedSession});
+    console.log(this.state);
+    this.updatePlayerTurn();
+
+
+    toast.dark(data.leftPlayerName+" has left the story");
+  }
+  updatePlayerTurn(){
+    const self = this;
+    console.log(this.state.session);
+    Object.keys(self.state.session.playersInSessionIds).forEach(function(key, index){
+      if(self.state.messages[self.state.messages.length-1] != undefined && (self.state.messages[self.state.messages.length-1].authorId != null && self.state.messages[self.state.messages.length-1].authorId != undefined) && key == self.state.messages[self.state.messages.length-1].authorId){
+        if(Object.keys(self.state.session.playersInSessionIds).length > index+1 && self.state.session.playersInSessionIds[key] != null){
+          self.setState({currentTurnUserId:index+1});
+        } else{
+          self.setState({currentTurnUserId:0});
+        }
+      }
+    });
+  }
+
+  onWordCreated(word){
+    console.log(this.state);
+    word.playerIndex = this.getPlayerIndex(word.authorId);
+    this.setState({
+      messages:this.state.messages.concat(word)
+    })
+    this.updatePlayerTurn();
   }
 
   componentDidMount(){
@@ -84,21 +119,7 @@ class StoryChat extends Component{
       return false;
     }
     var self = this;
-    this.messages.on('created', function(message){
-      self.setState({
-        messages:self.state.messages.concat(message)
-      })
 
-      Object.keys(self.state.session.playersInSessionIds).forEach(function(key, index){
-        if((self.state.messages[self.state.messages.length-1].authorId != null && self.state.messages[self.state.messages.length-1].authorId != undefined) && key == self.state.messages[self.state.messages.length-1].authorId){
-          if(Object.keys(self.state.session.playersInSessionIds).length > index+1){
-            self.setState({currentTurnUserId:index+1});
-          } else{
-            self.setState({currentTurnUserId:0});
-          }
-        }
-      });
-    });
     this.session.get(this.props.location.pathname.split("/")[2], function(){
     }).then(function(data){
       let playerSession = {};
@@ -195,7 +216,7 @@ class StoryChat extends Component{
     let userIndex;
     const self = this;
     Object.keys(this.state.session.playersInSessionIds).forEach(function(key, index){
-      if(key == self.props.userId)
+      if(key == self.props.userId && self.state.session.playersInSessionIds[key] != null)
         userIndex = index;
     });
     if(userIndex == this.state.currentTurnUserId)
@@ -241,7 +262,7 @@ class StoryChat extends Component{
         newestOnTop={true}/>
         <div className="fullScreen">
             {this.state.messages.map((value, index)=>{
-                return <Word word={value.text} key={index} userColor={playerColors[this.getPlayerIndex(value.authorId)]}/>
+                return <Word word={value.text} key={index} userColor={playerColors[value.playerIndex]}/>
             })}
 
             {Object.keys(this.state.session.playersInSessionIds).map((key, index)=>{
