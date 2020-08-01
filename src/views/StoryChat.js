@@ -20,7 +20,6 @@ class StoryChat extends Component{
   
   constructor(props){
     super()
-    
     const socket = props.connection;
     const feathersClient = feathers();
     feathersClient.configure(feathers.socketio(socket));
@@ -29,7 +28,6 @@ class StoryChat extends Component{
     }
     this.messages = feathersClient.service('messages')
     this.session = feathersClient.service("sessions");
-
     this.state={exit:false, messages:[], storyTitle:'', typingUser:{id:0, typing:false}, session:{playersInSessionIds:{}}, currentTurnUserId:0};
     this.addWord = this.addWord.bind(this);
     this.onWordFieldChange = this.onWordFieldChange.bind(this);
@@ -42,7 +40,6 @@ class StoryChat extends Component{
     this.onLeaveGameButtonPressed = this.onLeaveGameButtonPressed.bind(this);
     this.updatePlayerTurn = this.updatePlayerTurn.bind(this);
     this.onWordCreated = this.onWordCreated.bind(this);
-
     this.messages.on('created', this.onWordCreated);
   }
 
@@ -126,6 +123,12 @@ class StoryChat extends Component{
       playerSession[self.props.userId] = {typing:false}
       self.session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
         self.setState({session:data});
+        self.messages.get(self.props.location.pathname.split("/")[2]).then(function(data){
+          for(const word of data){
+            word.playerIndex = self.getPlayerIndex(word.authorId);
+          }
+          self.setState({messages:data})
+        });
       }, function(error){
         self.props.alert.show(error.message, {
           title:"Uhoh, something went wrong...", 
