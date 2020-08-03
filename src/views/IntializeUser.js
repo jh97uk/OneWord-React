@@ -3,7 +3,7 @@ import '../App.css';
 import {Link, BrowserRouter as Router} from 'react-router-dom';
 import Logo from '../widgets/logo';
 import Ripples from 'react-ripples';
-import Cookies from 'universal-cookie';
+import { withAlert } from "react-alert";
 import feathers from '@feathersjs/client';
 import { Facebook } from 'react-spinners-css';
 
@@ -23,13 +23,15 @@ class InitializeUserView extends Component{
     createUser(){
         this.setState({loading:true})
         const self = this;
-        this.users.create({name:this.state.username})
-        this.users.on('created', function(user){
+        this.users.create({name:this.state.username}).then(function(user){
             self.setState({loading:false})
             self.props.setUser(user);
-        })
-
-        
+        }, function(error){
+            self.props.alert.show(error.message, {
+                title:"Uhoh, something went wrong...", 
+                closeCopy:'Ok'})
+            self.setState({loading:false});
+        });
     }
 
     render(){
@@ -74,4 +76,4 @@ class InitializeUserView extends Component{
     }
 }
 
-export default InitializeUserView;
+export default withAlert()(InitializeUserView);
