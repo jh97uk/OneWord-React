@@ -9,6 +9,7 @@ import Switch from 'react-switch';
 import feathers from '@feathersjs/client';
 import { Facebook } from 'react-spinners-css';
 import { withAlert } from "react-alert";
+import OneLib from '../OneLib.js';
 
 class CreateGameView extends Component {
   
@@ -21,7 +22,7 @@ class CreateGameView extends Component {
     
     this.sessions = feathersClient.service('sessions')
 
-    this.state = {createStoryLoading:false, linkOnly: false, storyTitle: '', sessionOwnerId:props.userId};
+    this.state = {loading:false, linkOnly: false, storyTitle: '', sessionOwnerId:props.userId};
     this.handleChange = this.handleChange.bind(this);
     this.createGame = this.createGame.bind(this);
   }
@@ -35,17 +36,14 @@ class CreateGameView extends Component {
   }
 
   createGame() {
-    this.setState({createStoryLoading:true})
+    this.setState({loading:true})
     const self = this;
     this.sessions.create({linkOnly:this.state.linkOnly, storyTitle:this.state.storyTitle, sessionOwnerId:this.state.sessionOwnerId}).then(function(session){
-      self.setState({createStoryLoading:true, createdSession: session})
+      self.setState({loading:true, createdSession: session})
     }, function(error){
-      self.props.alert.show(error.message, {
-        title:"Uhoh, something went wrong...", 
-        closeCopy:'Ok',
-        onClose:function(){
-          self.setState({createStoryLoading:false});
-        }})
+      OneLib.showError(self.props.alert, error, function(){
+        self.setState({loading:false});
+      });
     });
   }
 

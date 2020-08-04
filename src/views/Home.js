@@ -3,7 +3,6 @@ import '../App.css';
 import {Link, BrowserRouter as Router} from 'react-router-dom';
 import Logo from '../widgets/logo';
 import Ripples from 'react-ripples';
-import CreateGameView from '../views/CreateGame';
 
 function HomeView() {
   return (

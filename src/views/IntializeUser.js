@@ -6,6 +6,7 @@ import Ripples from 'react-ripples';
 import { withAlert } from "react-alert";
 import feathers from '@feathersjs/client';
 import { Facebook } from 'react-spinners-css';
+import OneLib from '../OneLib.js';
 
 class InitializeUserView extends Component{
     constructor(props){
@@ -14,7 +15,6 @@ class InitializeUserView extends Component{
         this.createUser = this.createUser.bind(this);
         const socket = props.connection;
         const feathersClient = feathers();
-
         feathersClient.configure(feathers.socketio(socket));
 
         this.users = feathersClient.service('users');
@@ -27,9 +27,7 @@ class InitializeUserView extends Component{
             self.setState({loading:false})
             self.props.setUser(user);
         }, function(error){
-            self.props.alert.show(error.message, {
-                title:"Uhoh, something went wrong...", 
-                closeCopy:'Ok'})
+            OneLib.showError(self.props.alert, error, function(){})
             self.setState({loading:false});
         });
     }

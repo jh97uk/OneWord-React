@@ -5,7 +5,7 @@ import ReactLoading from 'react-loading';
 import Ripples from 'react-ripples';
 import Logo from '../widgets/logo';
 import { withAlert } from "react-alert";
-
+import OneLib from '../OneLib';
 
 class JoiningStory extends React.Component{
   constructor(props){
@@ -16,18 +16,14 @@ class JoiningStory extends React.Component{
     }
   }
   componentDidMount(){
-    console.log("mounted");
     if(!this.props.userId)
       return;
     const self = this;
     fetch('http://localhost:3030/sessions', {mode:'cors'}).then(response=>response.json()).then(data=>{
-      if(data.code != undefined && data.code == 404){
-        self.props.alert.show(data.message, {
-          title:"Uhoh, something went wrong...", 
-          closeCopy:'Ok',
-          onClose:function(){
-            self.setState({exit:true});
-          }})
+      if(data.code != undefined && data.code == 500){
+        OneLib.showError(self.props.alert, data, function(){
+          self.setState({exit:true});
+        })
       } else{
         self.setState({gameIdFound:data.id});
       }

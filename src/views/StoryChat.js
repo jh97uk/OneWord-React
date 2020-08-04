@@ -1,23 +1,16 @@
 /* eslint-disable import/first */
-
-import Cookies from 'universal-cookie';
 import React, {Component, Fragment, useState} from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { withAlert } from "react-alert";
 import 'react-toastify/dist/ReactToastify.css';
 import '../App.css';
-import Ripples from 'react-ripples';
 import AppBar from '../widgets/AppBar';
 import Word from '../widgets/Word';
 import {Redirect} from 'react-router-dom';
-import PropTypes from "prop-types";
-import { withRouter } from "react-router";
-import {nanoid} from 'nanoid';
-import io from 'socket.io-client';
 import feathers from '@feathersjs/client';
+import OneLib from '../OneLib.js';
 
 class StoryChat extends Component{
-  
   constructor(props){
     super()
     const socket = props.connection;
@@ -130,12 +123,9 @@ class StoryChat extends Component{
           self.setState({messages:data})
         });
       }, function(error){
-        self.props.alert.show(error.message, {
-          title:"Uhoh, something went wrong...", 
-          closeCopy:'Ok',
-          onClose:function(){
-            self.setState({exit:true});
-          }})
+        OneLib.showError(self.props.alert, error, function(){
+          self.setState({exit:true});
+        })
       });
 
       self.session.on('patched', self.onSessionChangedListener);
@@ -143,12 +133,9 @@ class StoryChat extends Component{
       self.session.on('left', self.onPlayerLeftListener);
       self.setState({storyTitle:data.name})
     }, function(error){
-      self.props.alert.show("Uhoh, something went wrong...", {
-        title:error.message, 
-        closeCopy:'Ok',
-        onClose:function(){
-          self.setState({exit:true});
-        }})
+      OneLib.showError(self.props.alert, error, function(){
+        self.setState({exit:true});
+      })
     });
     
   } 
@@ -199,9 +186,9 @@ class StoryChat extends Component{
       userId:this.props.userId
     }).then(function(data){
     }, function(error){
-      self.props.alert.show("Uhoh, something went wrong...", {
-        title:error.message, 
-        closeCopy:'Ok'})
+      OneLib.showError(self.props.alert, error, function(){
+        self.setState({exit:true});
+      })
     })
     this.setState({sendWord:''});
   }
