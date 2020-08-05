@@ -33,6 +33,9 @@ class StoryChat extends Component{
     this.onLeaveGameButtonPressed = this.onLeaveGameButtonPressed.bind(this);
     this.updatePlayerTurn = this.updatePlayerTurn.bind(this);
     this.onWordCreated = this.onWordCreated.bind(this);
+    this.joinStory = this.joinStory.bind(this);
+    this.initiateTypingTimeout = this.initiateTypingTimeout.bind(this);
+    this.setPlayerTyping = this.setPlayerTyping.bind(this);
     this.messages.on('created', this.onWordCreated);
   }
 
@@ -68,18 +71,16 @@ class StoryChat extends Component{
     toast.dark(data.newPlayer+" has joined the story");
   }
 
-  onPlayerLeftListener = function(data){
-    if(data.leftPlayerId == this.props.userId)
+  onPlayerLeftListener = function(player){
+    if(player.leftPlayerId == this.props.userId)
       return
-    console.log(data);
     const updatedSession = this.state.session;
-    delete updatedSession.playersInSessionIds[data.leftPlayerId];
+    delete updatedSession.playersInSessionIds[player.leftPlayerId];
     this.setState({session:updatedSession});
     console.log(this.state);
     this.updatePlayerTurn();
 
-
-    toast.dark(data.leftPlayerName+" has left the story");
+    toast.dark(player.leftPlayerName+" has left the story");
   }
   updatePlayerTurn(){
     const self = this;
@@ -96,7 +97,6 @@ class StoryChat extends Component{
   }
 
   onWordCreated(word){
-    console.log(this.state);
     word.playerIndex = this.getPlayerIndex(word.authorId);
     this.setState({
       messages:this.state.messages.concat(word)
@@ -104,77 +104,95 @@ class StoryChat extends Component{
     this.updatePlayerTurn();
   }
 
-  componentDidMount(){
-    if(!this.props.userId){
-      return false;
-    }
-    var self = this;
-
-    this.session.get(this.props.location.pathname.split("/")[2], function(){
-    }).then(function(data){
-      let playerSession = {};
-      playerSession[self.props.userId] = {typing:false}
-      self.session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
-        self.setState({session:data});
-        self.messages.get(self.props.location.pathname.split("/")[2]).then(function(data){
-          for(const word of data){
-            word.playerIndex = self.getPlayerIndex(word.authorId);
-          }
-          self.setState({messages:data})
-        });
-      }, function(error){
-        OneLib.showError(self.props.alert, error, function(){
-          self.setState({exit:true});
-        })
+  joinStory(storyId){
+    const self = this;
+    let playerSession = {};
+    playerSession[self.props.userId] = {typing:false}
+    this.session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
+      self.setState({session:data});
+      self.messages.get(self.props.location.pathname.split("/")[2]).then(function(data){
+        for(const word of data){
+          word.playerIndex = self.getPlayerIndex(word.authorId);
+        }
+        self.setState({messages:data})
       });
-
-      self.session.on('patched', self.onSessionChangedListener);
-      self.session.on("joined", self.onPlayerJoinedListener);
-      self.session.on('left', self.onPlayerLeftListener);
-      self.setState({storyTitle:data.name})
     }, function(error){
       OneLib.showError(self.props.alert, error, function(){
         self.setState({exit:true});
       })
     });
-    
+
+    self.session.on('patched', self.onSessionChangedListener);
+    self.session.on("joined", self.onPlayerJoinedListener);
+    self.session.on('left', self.onPlayerLeftListener);
+  }
+
+  componentDidMount(){
+    if(!this.props.userId){
+      return false;
+    }
+    const self = this;
+    const storyId = this.props.location.pathname.split("/")[2];
+
+    this.session.get(storyId, function(){
+    }).then(function(story){
+      self.joinStory(storyId)
+      self.setState({storyTitle:story.name})
+    }, function(error){
+      OneLib.showError(self.props.alert, error, function(){
+        self.setState({exit:true});
+      })
+    });
   } 
 
   componentWillUnmount(){
     if(!this.props.userId){
       return false;
     }
+
     this.session.removeListener("joined", this.onPlayerJoinedListener);
     this.session.removeListener("patched", this.onSessionChangedListener);
     this.session.removeListener('left', this.onPlayerLeftListener);
+
     if(this.state.session.playersInSessionIds[this.props.userId] === undefined){
       return false;
     }
+
     let playerSession = {};
     playerSession[this.props.userId] = null
     this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
   }
 
-  onWordFieldChange(text){
-    const dateNow = Date.now();
-    const dateDiff = dateNow-this.state.lastKeyStroke;
-    let playerSession = {}
-    if(this.state.lastKeyStroke == null || dateDiff >= 1000){
-      playerSession[this.props.userId] = {typing:true}
-      this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
+  initiateTypingTimeout(playerSession){
+    clearInterval(this.typingInterval);
       this.typingInterval = setInterval(()=>{
         playerSession[this.props.userId] = {typing:false}
         this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
         clearInterval(this.typingInterval);
-      }, 1000)
+      }, 1000);
+  }
+
+  setPlayerTyping(status){
+    let playerSession = {}
+    if(status){
+      playerSession[this.props.userId] = {typing:true}
+      this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
+      this.initiateTypingTimeout(playerSession);
     } else{
-      clearInterval(this.typingInterval);
-      playerSession[this.props.userId] = {typing:false}
-      this.typingInterval = setInterval(()=>{
-        this.session.patch(this.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession});
-        clearInterval(this.typingInterval);
-      }, 1000)
+      this.initiateTypingTimeout(playerSession);
     }
+  }
+
+  onWordFieldChange(text){
+    const dateNow = Date.now();
+    const dateDiff = dateNow-this.state.lastKeyStroke;
+    
+    if(this.state.lastKeyStroke == null || dateDiff >= 1000){
+      this.setPlayerTyping(true);
+    } else{
+      this.setPlayerTyping(false); 
+    }
+
     this.setState({sendWord:text, lastKeyStroke:Date.now()})
   }
 
