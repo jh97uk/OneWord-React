@@ -34,7 +34,11 @@ const users = feathersClient.service('users');
 class App extends Component{
   constructor(props){
     super();
-    this.state = {userId:null, requestedPath:window.location.pathname}
+    let requestedPath = window.location.pathname;
+    if(requestedPath == '/user/new'){
+      requestedPath = '/'
+    }
+    this.state = {userId:null, requestedPath:requestedPath}
     this.setUser = this.setUser.bind(this)
   }
   setUser(user){
