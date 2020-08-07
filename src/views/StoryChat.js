@@ -77,14 +77,12 @@ class StoryChat extends Component{
     const updatedSession = this.state.session;
     delete updatedSession.playersInSessionIds[player.leftPlayerId];
     this.setState({session:updatedSession});
-    console.log(this.state);
     this.updatePlayerTurn();
 
     toast.dark(player.leftPlayerName+" has left the story");
   }
   updatePlayerTurn(){
     const self = this;
-    console.log(this.state.session);
     Object.keys(self.state.session.playersInSessionIds).forEach(function(key, index){
       if(self.state.messages[self.state.messages.length-1] != undefined && (self.state.messages[self.state.messages.length-1].authorId != null && self.state.messages[self.state.messages.length-1].authorId != undefined) && key == self.state.messages[self.state.messages.length-1].authorId){
         if(Object.keys(self.state.session.playersInSessionIds).length > index+1 && self.state.session.playersInSessionIds[key] != null){
@@ -111,9 +109,6 @@ class StoryChat extends Component{
     this.session.patch(self.props.location.pathname.split("/")[2], {playersInSessionIds:playerSession}).then(function(data){
       self.setState({session:data});
       self.messages.get(self.props.location.pathname.split("/")[2]).then(function(data){
-        for(const word of data){
-          word.playerIndex = self.getPlayerIndex(word.authorId);
-        }
         self.setState({messages:data})
       });
     }, function(error){
@@ -241,6 +236,7 @@ class StoryChat extends Component{
     });
     return colorIndex;
   }
+  
   render(){
     const words = [];
     const playerColors = {0:'#0e1d42', 1:"#76AA72", 2:"#165C6C"}
