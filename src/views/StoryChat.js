@@ -36,7 +36,6 @@ class StoryChat extends Component{
     this.joinStory = this.joinStory.bind(this);
     this.initiateTypingTimeout = this.initiateTypingTimeout.bind(this);
     this.setPlayerTyping = this.setPlayerTyping.bind(this);
-    this.messages.on('created', this.onWordCreated);
   }
 
   onLeaveGameButtonPressed(){
@@ -95,7 +94,10 @@ class StoryChat extends Component{
   }
 
   onWordCreated(word){
-    word.playerIndex = this.getPlayerIndex(word.authorId);
+    console.log(word);
+    console.log(this.state.session);
+    this.getPlayerIndex(word.authorId);
+    word.playerColorIndex = this.state.session.playersInSessionIds[word.authorId].colorId;
     this.setState({
       messages:this.state.messages.concat(word)
     })
@@ -110,6 +112,8 @@ class StoryChat extends Component{
       self.setState({session:data});
       self.messages.get(self.props.location.pathname.split("/")[2]).then(function(data){
         self.setState({messages:data})
+        self.messages.on('created', self.onWordCreated);
+
       });
     }, function(error){
       OneLib.showError(self.props.alert, error, function(){
@@ -229,6 +233,7 @@ class StoryChat extends Component{
 
   getPlayerIndex(id){
     let colorIndex = 0;
+    console.log(this.state.session);
     Object.keys(this.state.session.playersInSessionIds).forEach(function(key, index){
       if(key == id){
         colorIndex = index;
@@ -266,12 +271,14 @@ class StoryChat extends Component{
         newestOnTop={true}/>
         <div className="fullScreen">
             {this.state.messages.map((value, index)=>{
-                return <Word word={value.text} key={index} userColor={playerColors[value.playerIndex]}/>
+                console.log(value);
+                return <Word word={value.text} key={index} userColor={playerColors[value.playerColorIndex]}/>
             })}
 
             {Object.keys(this.state.session.playersInSessionIds).map((key, index)=>{
                 if(this.state.session.playersInSessionIds[key] != null && this.props.userId != key){
-                  return <Word word="" key={index} typing={this.state.session.playersInSessionIds[key].typing} userColor={playerColors[index]} hidden={!this.state.session.playersInSessionIds[key].typing}/>
+                  const colorId = this.state.session.playersInSessionIds[key].colorId;
+                  return <Word word="" key={index} typing={this.state.session.playersInSessionIds[key].typing} userColor={playerColors[colorId]} hidden={!this.state.session.playersInSessionIds[key].typing}/>
                 } 
             })}
 
