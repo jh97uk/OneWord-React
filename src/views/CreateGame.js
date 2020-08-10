@@ -39,7 +39,7 @@ class CreateGameView extends Component {
     this.setState({loading:true})
     const self = this;
     this.sessions.create({linkOnly:this.state.linkOnly, storyTitle:this.state.storyTitle, sessionOwnerId:this.state.sessionOwnerId}).then(function(session){
-      self.setState({loading:true, createdSession: session})
+      self.setState({loading:false, createdSession: session})
     }, function(error){
       OneLib.showError(self.props.alert, error, function(){
         self.setState({loading:false});
@@ -80,7 +80,7 @@ class CreateGameView extends Component {
               <label>LINK ONLY</label>
               <Switch onChange={this.handleChange} checked={this.state.linkOnly}></Switch>
             </li>
-            <li>
+            <li style={{textAlign:'center'}}>
               {loadingButton}
             </li>
           </ul>
