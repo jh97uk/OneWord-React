@@ -1,68 +1,62 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+### 👋 One Word - An introduction
 
-In the project directory, you can run:
+  
 
-### `npm start`
+This was a project I began on the 4th of July as a part of my drive to get back into programming as a hobby.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+  
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+In the weeks following, I've been hard at work to make it fully functional
 
-### `npm test`
+  
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The goal of the game simple:
 
-### `npm run build`
+* You create a "story" with a prompt title
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* You can then share a link to the story with a friend or (if the game is public), wait for someone to join your story through the matchmaking system
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+* Once you have someone to play with, all players in the game begin to craft a story, 1 word each
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+  
 
-### `npm run eject`
+This can lead to some pretty funny and amusing stories.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+  
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 🖥️ Technologies
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+  
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+For the frontend of this project, I utilized **React** and **FeathersJS**.
 
-## Learn More
+  
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+#### Why React?
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+  
 
-### Code Splitting
+I decided on React because it's by far my most familiar web development library for the frontend. I feel very comfortable and able with this library, so it seemed like the perfect fit for this concept. It also felt like the best library to use for quickly putting something together.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+  
 
-### Analyzing the Bundle Size
+#### Why FeathersJS?
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+  
 
-### Making a Progressive Web App
+Feathers JS is a project I've always wanted to have a play with. It seemed like a really nice way to quickly build applications based off of realtime data, which obviously, with words being sent to and from the server has been key. I'm glad I chose it, it's proven to be very light weight, and not too overwhelming. It has allowed me to quickly throw together an API without getting too bogged down in the minutiae that building APIs causes.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+  
 
-### Advanced Configuration
+### 🔨 Setup
+Running the frontend for OneWord should be pretty simple.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+  
 
-### Deployment
+`npm start` will suffice, and so long as the backend is running, it will run fine.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+  
 
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+### 📝 End notes
+Some quick final notes, this project is more or less finished. I do plan on putting it onto a server in the near future once I've got my Mac build up and running so I can debug a few iOS specific issues. That being said, I'm not entirely happy with the code base just yet. I feel like I have a pretty nice setup going, but I'm not happy with the names of some classes and variables.
