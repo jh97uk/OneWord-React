@@ -216,7 +216,7 @@ class StoryChat extends Component{
     }).then(function(data){
     }, function(error){
       OneLib.showError(self.props.alert, error, function(){
-        self.setState({exit:true});
+        self.setState({exit:false});
       })
     })
     this.setState({sendWord:''});
