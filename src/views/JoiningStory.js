@@ -6,6 +6,7 @@ import Ripples from 'react-ripples';
 import Logo from '../widgets/logo';
 import { withAlert } from "react-alert";
 import OneLib from '../OneLib';
+import {Button} from '@material-ui/core';
 
 class JoiningStory extends React.Component{
   constructor(props){
@@ -44,7 +45,7 @@ class JoiningStory extends React.Component{
             </div>
             <ul className="mainMenuButtons">
               <li>
-               <Ripples color="#9e9e9e"><Link to="/" className="button primary">CANCEL</Link></Ripples>
+                <Button component={(props)=><Link to="/" {...props}/>} variant="contained" style={{width:'100%'}} linkButton={true} color="secondary">CANCEL</Button>
               </li>
             </ul>
           

@@ -9,6 +9,18 @@ import Word from '../widgets/Word';
 import {Redirect} from 'react-router-dom';
 import feathers from '@feathersjs/client';
 import OneLib from '../OneLib.js';
+import {Button} from '@material-ui/core';
+
+import { createMuiTheme, withStyles, makeStyles, ThemeProvider } from '@material-ui/core/styles';
+const ColorButton = withStyles((theme) => ({
+    root: {
+      color: theme.palette.getContrastText('rgb(30, 39, 94)'),
+      backgroundColor: 'rgb(30, 39, 94)',
+      '&:hover': {
+        backgroundColor: 'rgb(30, 39, 94)',
+      },
+    },
+  }))(Button);
 
 class StoryChat extends Component{
   constructor(props){
@@ -287,7 +299,7 @@ class StoryChat extends Component{
 
         <div className="messageBar">
           <input ref={(input)=>{this.wordInput = input}} placeholder="WORD" disabled={!this.isItMyTurn()} type="text" value={this.state.sendWord || ""} onChange={event=>this.onWordFieldChange(event.target.value)} onKeyDown={this.onEnterPressed}></input>
-          <button onClick={()=>this.addWord(this.state.sendWord)} disabled={!this.isItMyTurn()}>SEND</button>
+          <ColorButton onClick={()=>this.addWord(this.state.sendWord)} disabled={!this.isItMyTurn()} style={{flexGrow:1, borderRadius:0}}>SEND</ColorButton>
         </div>
         
       </div>

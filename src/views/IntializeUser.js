@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import '../App.css';
 import {Link, BrowserRouter as Router} from 'react-router-dom';
+import {Button, TextField} from '@material-ui/core';
 import Logo from '../widgets/logo';
 import Ripples from 'react-ripples';
 import { withAlert } from "react-alert";
@@ -33,40 +34,37 @@ class InitializeUserView extends Component{
     }
 
     render(){
-        let loadingButton;
-        if(this.state.loading){
-            loadingButton = (<Facebook color={'black'}></Facebook>);
-        } else{
-            loadingButton = (
-                <Ripples color="#9e9e9e" className="fullWidth"><button onClick={this.createUser} className="button primary"
-                                style={{
-                                    width:'100%',
-                                    height:'40px',
-                                    border:'0px',
-                                    borderRadius:'6px',
-                                    fontSize:'18px',
-                                    fontWeight:'500'
-                                }}>START</button></Ripples>
-            )
-        }
         return (
             <div>
               <Logo></Logo>
                 <ul className="mainMenuButtons">
                     <li>
-                        <input placeholder="USERNAME" type="text" onChange={event => this.setState({ username: event.target.value })} style={{
-                            width:'calc(100% - 35px)',
-                            height:'40px',
-                            fontSize:'25px',
-                            padding:'10px'
-                        }}></input>
+                        <TextField
+                            label="USERNAME"
+                            variant="outlined"
+                            color="#272c34"
+                            onChange={event => this.setState({ username: event.target.value })}
+                            style={{
+                                width:'100%',
+                                height:'40px',
+                            }}/>
                     </li>
                     <li style={{
                         display:'inline-block',
                         width:'100%',
-                        textAlign:'center'
+                        textAlign:'center',
+                        paddingTop:15
                     }}>
-                        {loadingButton}
+                        {this.state.loading ? 
+                            <Facebook color={'black'}></Facebook> 
+                                :
+                            <Button variant="contained" style={{
+                                width:'100%',
+                                height:'40px',
+                                fontWeight:'500'
+                                }}
+                                onClick={this.createUser}>CREATE USER</Button>
+                        }
                     </li>
                 </ul>
             </div>

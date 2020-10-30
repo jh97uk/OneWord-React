@@ -2,18 +2,21 @@ import React from 'react';
 import '../App.css';
 import {Link, BrowserRouter as Router} from 'react-router-dom';
 import Logo from '../widgets/logo';
-import Ripples from 'react-ripples';
+import {Button} from '@material-ui/core';
 
 function HomeView() {
+  const buttonStyle = {
+    width:'100%'
+  }
   return (
     <div>
       <Logo></Logo>
         <ul className="mainMenuButtons">
               <li>
-               <Ripples color="#9e9e9e"><Link to="/create" className="button primary">START A GAME</Link></Ripples>
+                <Button component={(props)=><Link to="/create" {...props}/>} variant="contained" style={buttonStyle} linkButton={true}>CREATE GAME</Button>
               </li>
               <li>
-                <Ripples><Link to="/join/random" className="button">JOIN RANDOM GAME</Link></Ripples>
+                <Button component={(props)=><Link to="/join/random" {...props}/>} variant="contained" style={buttonStyle} linkButton={true} color="secondary">JOIN RANDOM GAME</Button>
               </li>
         </ul>
     </div>

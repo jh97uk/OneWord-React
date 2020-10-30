@@ -152,19 +152,6 @@ a.button.primary{
   margin-top: 25px;
 }
 
-.centeredContainer input{
-  width:calc(100% - 9px);
-  padding:0px;
-  margin:0px;
-  height:40px;
-  font-family: 'Times New Roman', Times, serif;
-  font-size: 20px;
-  border:1px solid grey;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  padding-left: 7px;
-}
-
 .centeredContainer ul{
   padding:0px;
   margin: 0px;
@@ -256,15 +243,4 @@ a.button.primary{
     padding-left:10px;
     font-size: 22px;
     background:#f9f9f9;
-  }
-
-  .messageBar button{
-    height:100%;
-    margin:0px;
-    border:none;
-    background-color:rgb(30, 39, 94);
-    color:white;
-    font-family: 'Times New Roman', Times, serif;
-    font-size: 16px;
-    flex-grow: 1;
   }

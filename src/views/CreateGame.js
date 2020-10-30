@@ -5,11 +5,11 @@ import '../App.css';
 import Ripples from 'react-ripples';
 import AppBar from '../widgets/AppBar';
 import { Link, BrowserRouter as Router, Redirect } from 'react-router-dom';
-import Switch from 'react-switch';
 import feathers from '@feathersjs/client';
 import { Facebook } from 'react-spinners-css';
 import { withAlert } from "react-alert";
 import OneLib from '../OneLib.js';
+import {Button, TextField, Switch} from '@material-ui/core';
 
 class CreateGameView extends Component {
   
@@ -27,8 +27,8 @@ class CreateGameView extends Component {
     this.createGame = this.createGame.bind(this);
   }
 
-  handleChange(linkOnly) {
-    this.setState({ linkOnly });
+  handleChange(event) {
+    this.setState({ linkOnly: event.target.checked});
   }
 
   componentDidMount() {
@@ -54,7 +54,6 @@ class CreateGameView extends Component {
 
     let loadingButton;
     if(this.state.loading){
-      loadingButton = (<Facebook color={'black'}></Facebook>);
     } else{
         loadingButton = (
             <Ripples color="#9e9e9e" className="fullWidth"><button onClick={this.createGame} className="button primary"
@@ -72,16 +71,22 @@ class CreateGameView extends Component {
     return (
       <div>
         <AppBar pageTitle="CREATE A GAME" backRoute="/"></AppBar>
-
         <div className="centeredContainer">
-          <input placeholder="PROMPT TITLE" type="text" onChange={event => this.setState({ storyTitle: event.target.value })}></input>
+          <TextField
+            label="PROMPT TITLE"
+            variant="outlined"
+            onChange={event => this.setState({ storyTitle: event.target.value })}
+            style={{width:'100%', marginBottom:15}}/>
           <ul>
             <li>
-              <label>LINK ONLY</label>
+              <label style={{lineHeight:'38px'}}>LINK ONLY</label>
               <Switch onChange={this.handleChange} checked={this.state.linkOnly}></Switch>
             </li>
             <li style={{textAlign:'center'}}>
-              {loadingButton}
+              {this.state.loading ? 
+              <Facebook color={'black'}></Facebook>
+                :
+              <Button onClick={this.createGame} variant="contained" style={{width:'100%'}}>CREATE GAME</Button>}
             </li>
           </ul>
         </div>
