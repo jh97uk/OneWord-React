@@ -10,7 +10,9 @@ import {
   Link,
   Redirect
 } from 'react-router-dom';
-
+import { ThemeProvider } from '@material-ui/core/styles'
+import CssBaseline from '@material-ui/core/CssBaseline'
+import Theme from './Theme.js'
 import Logo from './widgets/logo';
 import Ripples from 'react-ripples';
 import CreateGameView from './views/CreateGame';
@@ -25,7 +27,7 @@ import AlertMUITemplate from "react-alert-template-mui";
 import io from 'socket.io-client';
 import feathers from '@feathersjs/client';
 
-const socket = io('http://192.168.0.15:3030');
+const socket = io('http://localhost:3030');
 const Cookie = new Cookies();
 const feathersClient = feathers();
 feathersClient.configure(feathers.socketio(socket));
@@ -54,25 +56,27 @@ class App extends Component{
     }
     
     return (
-      <Provider template={AlertMUITemplate}>
-        <div className="appContainer">
-          <Router>
-            {redirect}
-            <Switch>
-            <Route path="/user/new" render={(props)=><InitializeUserView {...props} connection={socket} setUser={this.setUser}/>}/>
-            <Route path="/join/random" render={(props)=><JoiningStory {...props} userId={this.state.userId}/>}/>
-            <Route path="/story/:storyId" render={(props)=><StoryChat {...props} connection={socket} userId={this.state.userId}/>}/>
-              <Route path="/create">
-                <CreateGameView connection={socket} userId={this.state.userId}></CreateGameView>
-              </Route>
-              <Route path="/">
-                <HomeView></HomeView>
-              </Route>
-            </Switch>
-          </Router>
-        </div>
-      </Provider>
-      
+      <ThemeProvider theme={Theme}>
+        <CssBaseline/>
+        <Provider template={AlertMUITemplate}>
+          <div className="appContainer">
+            <Router>
+              {redirect}
+              <Switch>
+              <Route path="/user/new" render={(props)=><InitializeUserView {...props} connection={socket} setUser={this.setUser}/>}/>
+              <Route path="/join/random" render={(props)=><JoiningStory {...props} userId={this.state.userId}/>}/>
+              <Route path="/story/:storyId" render={(props)=><StoryChat {...props} connection={socket} userId={this.state.userId}/>}/>
+                <Route path="/create">
+                  <CreateGameView connection={socket} userId={this.state.userId}></CreateGameView>
+                </Route>
+                <Route path="/">
+                  <HomeView></HomeView>
+                </Route>
+              </Switch>
+            </Router>
+          </div>
+        </Provider>
+      </ThemeProvider>
     );
   }
 }
